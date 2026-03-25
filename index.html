@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BK 數學筆記管理系統</title>
+    <title>BK 高中數學筆記全集 (Ch1-14)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { background-color: #ffffff; color: #1e293b; }
+        body { background-color: #ffffff; color: #1e293b; font-family: sans-serif; }
         .note-card { border: 1px solid #e2e8f0; transition: all 0.2s ease; cursor: pointer; }
-        .note-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
-        .active-card { border-color: #3b82f6; bg-color: #f8fafc; ring: 2px; ring-color: #3b82f6; }
-        iframe { width: 100%; height: 600px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .note-card:hover { border-color: #3b82f6; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .active-card { border-color: #3b82f6; background-color: #f8fafc; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        .pdf-viewer { width: 100%; height: calc(100vh - 220px); border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -25,102 +27,92 @@
 
         const App = () => {
             const [selected, setSelected] = useState(null);
-            const [uploadedFiles, setUploadedFiles] = useState({}); // 儲存每個 ID 對應的 PDF URL
 
-            const Icon = ({ n, s = 20 }) => {
+            const Icon = ({ n, s = 20, c = "" }) => {
                 const Comp = window.lucide[n];
-                return Comp ? <Comp size={s} /> : null;
+                return Comp ? <Comp size={s} className={c} /> : null;
             };
 
+            // 完整 1-14 章清單，對應你的上傳檔名
             const books = [
-                { id: 1, title: '1. 數與式', type: '學測' },
-                { id: 2, title: '2. 多項式', type: '學測' },
-                { id: 3, title: '3. 直線與圓', type: '學測' },
-                { id: 4, title: '4. 數列級數', type: '學測' },
-                { id: 5, title: '5. 數據分析', type: '學測' },
-                { id: 15, title: '15. 極限', type: '分科' },
-                { id: 16, title: '16. 微分', type: '分科' }
+                { id: 1, title: '1. 數與式', file: '1.數與式.pdf' },
+                { id: 2, title: '2. 多項式', file: '2.多項式.pdf' },
+                { id: 3, title: '3. 直線與圓', file: '3.直線與圓.pdf' },
+                { id: 4, title: '4. 數列級數', file: '4.數列級數.pdf' },
+                { id: 5, title: '5. 數據分析', file: '5.數據分析.pdf' },
+                { id: 6, title: '6. 排列組合、古典機率', file: '6.排列組合、古典機率.pdf' },
+                { id: 7, title: '7. 三角比', file: '7.三角比.pdf' },
+                { id: 8, title: '8. 三角函數', file: '8.三角函數.pdf' },
+                { id: 9, title: '9. 指對數函數', file: '9.指對數函數.pdf' },
+                { id: 10, title: '10. 平面向量', file: '10.平面向量.pdf' },
+                { id: 11, title: '11. 空間向量', file: '11.空間向量.pdf' },
+                { id: 12, title: '12. 空間中的平面和直線', file: '12.空間中的平面和直線.pdf' },
+                { id: 13, title: '13. 條件機率與貝氏定理', file: '13.條件機率與貝氏定理.pdf' },
+                { id: 14, title: '14. 矩陣', file: '14.矩陣.pdf' }
             ];
 
-            // 處理檔案上傳
-            const handleFileUpload = (event) => {
-                const file = event.target.files[0];
-                if (file && file.type === "application/pdf") {
-                    const fileURL = URL.createObjectURL(file);
-                    setUploadedFiles(prev => ({
-                        ...prev,
-                        [selected.id]: fileURL
-                    }));
-                } else {
-                    alert("請上傳 PDF 格式的檔案！");
-                }
-            };
-
             return (
-                <div className="max-w-6xl mx-auto px-6 py-12">
-                    <header className="mb-12 border-b pb-6">
-                        <h1 className="text-3xl font-bold text-slate-900">BK 數學筆記管理系統</h1>
-                        <p className="text-slate-500">點選章節後即可上傳並預覽 PDF</p>
+                <div className="max-w-7xl mx-auto px-6 py-8">
+                    <header className="mb-8 flex justify-between items-center border-b pb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white">
+                                <Icon n="Library" s={24} />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-black text-slate-900 tracking-tight">BK MATH ARCHIVE</h1>
+                                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">學測數學數位筆記系統</p>
+                            </div>
+                        </div>
+                        <div className="hidden md:flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full text-xs font-bold">
+                            <Icon n="CheckCircle2" s={16} /> 14 章節已連線
+                        </div>
                     </header>
 
-                    <div className="flex flex-col lg:flex-row gap-12">
-                        {/* 左側列表 */}
-                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {books.map(b => (
-                                <div key={b.id} onClick={() => setSelected(b)}
-                                    className={`note-card p-5 rounded-xl flex justify-between items-center ${selected?.id === b.id ? 'border-blue-500 bg-blue-50' : 'bg-white'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-2 h-2 rounded-full ${uploadedFiles[b.id] ? 'bg-green-500' : 'bg-slate-300'}`}></div>
-                                        <span className="font-semibold">{b.title}</span>
+                    <div className="flex flex-col lg:flex-row gap-8">
+                        {/* 左側滾動清單 */}
+                        <div className="lg:w-80 shrink-0 h-[calc(100vh-180px)] overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="space-y-2">
+                                {books.map(b => (
+                                    <div key={b.id} onClick={() => setSelected(b)}
+                                        className={`note-card p-4 rounded-xl flex items-center gap-4 ${selected?.id === b.id ? 'active-card' : 'bg-white'}`}>
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${selected?.id === b.id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                            {b.id}
+                                        </div>
+                                        <span className={`text-sm font-bold ${selected?.id === b.id ? 'text-blue-600' : 'text-slate-600'}`}>
+                                            {b.title.split('. ')[1]}
+                                        </span>
                                     </div>
-                                    {uploadedFiles[b.id] && <Icon n="FileCheck" className="text-green-600" />}
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
 
-                        {/* 右側操作區 */}
-                        <aside className="lg:w-[500px]">
+                        {/* 右側閱讀器 */}
+                        <main className="flex-1 min-w-0">
                             {selected ? (
-                                <div className="sticky top-8 space-y-6">
-                                    <div className="bg-slate-50 p-6 rounded-2xl border">
-                                        <h2 className="text-xl font-bold mb-4">{selected.title} - 管理內容</h2>
-                                        
-                                        {/* 上傳按鈕 */}
-                                        <div className="mb-6">
-                                            <label className="block w-full cursor-pointer bg-blue-600 text-white text-center py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors">
-                                                <input type="file" accept="application/pdf" className="hidden" onChange={handleFileUpload} />
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <Icon n="UploadCloud" s={18} /> 上傳本章節 PDF
-                                                </div>
-                                            </label>
-                                            <p className="text-[10px] text-slate-400 mt-2 text-center italic">註：上傳後僅供本次瀏覽，不會永久儲存在伺服器上</p>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                        <div className="flex items-center gap-3">
+                                            <Icon n="FileText" c="text-blue-600" />
+                                            <h2 className="font-black text-slate-800 tracking-tight">{selected.title}</h2>
                                         </div>
-
-                                        {/* 預覽區域 */}
-                                        {uploadedFiles[selected.id] ? (
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-sm font-bold text-green-600 flex items-center gap-1">
-                                                        <Icon n="Eye" s={14} /> 檔案已就緒
-                                                    </span>
-                                                    <button onClick={() => window.open(uploadedFiles[selected.id])} className="text-blue-600 text-xs font-bold underline">全螢幕觀看</button>
-                                                </div>
-                                                <iframe src={uploadedFiles[selected.id]} title="PDF Preview"></iframe>
-                                            </div>
-                                        ) : (
-                                            <div className="h-64 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-400 bg-white">
-                                                <Icon n="FileText" s={48} className="opacity-10 mb-2" />
-                                                <p className="text-sm">尚未上傳筆記</p>
-                                            </div>
-                                        )}
+                                        <button onClick={() => window.open(`./${selected.file}`, '_blank')} 
+                                            className="bg-white border shadow-sm px-4 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors">
+                                            <Icon n="Maximize2" s={14} /> 全螢幕閱覽
+                                        </button>
                                     </div>
+                                    <iframe 
+                                        src={`./${selected.file}`} 
+                                        className="pdf-viewer shadow-inner"
+                                        title="Note Viewer"
+                                    ></iframe>
                                 </div>
                             ) : (
-                                <div className="h-64 border border-dashed rounded-2xl flex items-center justify-center text-slate-400 italic">
-                                    請先從左側選擇一個章節
+                                <div className="h-full min-h-[500px] border-2 border-dashed border-slate-100 rounded-[2rem] flex flex-col items-center justify-center text-slate-300 space-y-4 bg-slate-50/30">
+                                    <Icon n="BookOpen" s={48} c="opacity-20" />
+                                    <p className="font-bold tracking-widest uppercase text-xs">請點選章節開啟筆記</p>
                                 </div>
                             )}
-                        </aside>
+                        </main>
                     </div>
                 </div>
             );
