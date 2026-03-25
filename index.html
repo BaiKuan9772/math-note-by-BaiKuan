@@ -14,30 +14,32 @@
         .animate-spin-slow { animation: spin-slow 8s linear infinite; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 10px; }
+        body { background-color: #f8fafc; }
     </style>
 </head>
-<body class="bg-slate-50">
+<body>
     <div id="root">
-        <div class="flex items-center justify-center min-h-screen text-slate-400 font-bold">載入中...</div>
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; color: #94a3b8; font-weight: bold; font-family: sans-serif;">
+            系統啟動中...
+        </div>
     </div>
 
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
 
         const App = () => {
-            // 這是關鍵：如果 Lucide 還沒載入，給一個替代方案避免崩潰
-            const LucideIcons = window.lucide || {};
+            // 安全取得全域圖標庫
+            const L = window.lucide || {};
             const { 
                 BookOpen, Clock, CheckCircle2, AlertCircle, Loader2, 
                 MousePointer2, FileText, FileUp, Plus, X, Share2, 
                 Server, Globe, GraduationCap 
-            } = LucideIcons;
+            } = L;
 
             const [selectedBook, setSelectedBook] = useState(null);
             const [activeTab, setActiveTab] = useState('全部');
             const [isOpening, setIsOpening] = useState(false);
             const [showMockViewer, setShowMockViewer] = useState(false);
-            const [fileStatus] = useState({ 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: true, 10: true, 11: true, 12: true, 13: true, 14: true });
 
             const books = [
                 { id: 1, title: '1. 數與式', examType: '學測', color: 'bg-blue-500', topics: ['算幾不等式', '絕對值', '常用對數'] },
@@ -57,7 +59,7 @@
                 { id: 15, title: '15. 數列函數極限', examType: '分科', color: 'bg-purple-500', topics: ['夾擠定理', '無窮等比級數', '函數連續性'] },
                 { id: 16, title: '16. 微分', examType: '分科', color: 'bg-purple-600', topics: ['導函數定義', '連鎖律', '切線與極值判別'] },
                 { id: 17, title: '17. 積分', examType: '分科', color: 'bg-purple-700', topics: ['黎曼和', '微積分基本定理', '反導函數'] },
-                { id: 18, title: '18. 多項式複數', examType: '分科', color: 'bg-blue-800', topics: ['隸美弗定理', '複數平面', '代數基本定理'] },
+                { id: 18, title: '18. 多項式方程複數', examType: '分科', color: 'bg-blue-800', topics: ['隸美弗定理', '複數平面', '代數基本定理'] },
                 { id: 19, title: '19. 二次曲線', examType: '分科', color: 'bg-orange-600', topics: ['拋物線', '橢圓', '雙曲線標準式'] },
                 { id: 20, title: '20. 機率統計II', examType: '分科', color: 'bg-rose-700', topics: ['白努利試驗', '二項分佈', '常態分佈'] }
             ];
@@ -66,122 +68,25 @@
                 activeTab === '全部' ? books : books.filter(b => b.examType === activeTab)
             , [activeTab]);
 
-            // 如果圖標組件沒載入成功，顯示純文字防止崩潰
-            const IconRender = ({icon: Icon, size = 20, className = ""}) => {
-                return Icon ? <Icon size={size} className={className} /> : <span className="w-5 h-5 bg-gray-200 rounded-full inline-block"></span>;
+            // 輔助組件：渲染圖標
+            const Icon = ({icon: Target, size = 20, className = ""}) => {
+                return Target ? <Target size={size} className={className} /> : <span className="inline-block w-5 h-5 bg-slate-200 rounded"></span>;
             };
 
             return (
-                <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-100 animate-in fade-in duration-700">
+                <div className="min-h-screen flex flex-col font-sans selection:bg-indigo-100 animate-in fade-in duration-700">
+                    {/* Header */}
                     <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-6 sticky top-0 z-30">
                         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                             <div className="flex items-center gap-4">
-                                <div className="bg-gradient-to-br from-indigo-600 to-violet-700 w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                                    <IconRender icon={BookOpen} size={28} />
+                                <div className="bg-gradient-to-br from-indigo-600 to-violet-700 w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-xl">
+                                    <Icon icon={BookOpen} size={28} />
                                 </div>
                                 <div>
                                     <h1 className="text-2xl font-black text-slate-800 tracking-tight">BK 高中數學筆記大全</h1>
-                                    <p className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">High School Math Library</p>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Digital Archive 2026</p>
                                 </div>
                             </div>
-                            <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                            <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
                                 {['全部', '學測', '分科'].map((tab) => (
-                                    <button key={tab} onClick={() => setActiveTab(tab)}
-                                        className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === tab ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-                                        {tab}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </header>
-
-                    <main className="flex-1 max-w-7xl mx-auto w-full p-6 md:p-8 flex flex-col lg:flex-row gap-10">
-                        <div className="flex-1">
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {filteredBooks.map((book) => (
-                                    <div key={book.id} onClick={() => setSelectedBook(book)}
-                                        className={`group relative cursor-pointer bg-white rounded-[2rem] p-4 transition-all duration-500 hover:shadow-2xl border-2 ${selectedBook?.id === book.id ? 'border-indigo-500 shadow-xl -translate-y-2' : 'border-transparent shadow-md'}`}>
-                                        <div className={`aspect-[3/4] rounded-2xl mb-4 ${book.color} flex flex-col justify-between p-5 text-white relative overflow-hidden shadow-inner transition-transform group-hover:scale-[1.02]`}>
-                                            <div className="text-5xl font-black opacity-20 italic">{book.id < 10 ? `0${book.id}` : book.id}</div>
-                                            <div className="font-bold text-lg leading-tight drop-shadow-md z-10">{book.title.split('. ')[1]}</div>
-                                        </div>
-                                        <div className="flex justify-between items-center px-1">
-                                            <div className="flex flex-col">
-                                                <span className={`text-[10px] font-black uppercase tracking-widest ${book.examType === '學測' ? 'text-blue-500' : 'text-purple-500'}`}>{book.examType}</span>
-                                                <span className="text-xs font-black text-slate-400">UNIT {book.id}</span>
-                                            </div>
-                                            {fileStatus[book.id] ? <IconRender icon={CheckCircle2} className="text-emerald-500" /> : <IconRender icon={AlertCircle} className="text-slate-300" />}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <aside className="w-full lg:w-96 shrink-0">
-                            {selectedBook ? (
-                                <div className="bg-white rounded-[3rem] shadow-2xl p-8 sticky top-32 border border-slate-100 flex flex-col h-fit transition-all animate-in slide-in-from-bottom duration-500">
-                                    <h2 className="text-4xl font-black text-slate-800 mb-6 leading-tight tracking-tighter">{selectedBook.title}</h2>
-                                    <div className="bg-indigo-50/50 rounded-3xl p-6 mb-8 border border-indigo-100/50">
-                                        <p className="text-[10px] font-black text-indigo-400 mb-4 flex items-center gap-2 tracking-widest uppercase"><IconRender icon={Clock} size={14}/> 核心章節概念</p>
-                                        <div className="space-y-4">
-                                            {selectedBook.topics.map((t, i) => (
-                                                <div key={i} className="flex items-start gap-3 text-sm font-bold text-slate-600">
-                                                    <div className="w-5 h-5 rounded-lg bg-white flex items-center justify-center text-[10px] text-indigo-500 shadow-sm shrink-0">{i+1}</div>
-                                                    <span>{t}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <button onClick={() => { setIsOpening(true); setTimeout(() => { setIsOpening(false); setShowMockViewer(true); }, 800); }}
-                                        className="w-full bg-indigo-600 text-white font-black py-5 rounded-[1.5rem] flex items-center justify-center gap-3 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-indigo-100">
-                                        {isOpening ? <IconRender icon={Loader2} className="animate-spin" /> : <IconRender icon={MousePointer2} size={20} />}
-                                        閱覽筆記內容
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="h-full min-h-[400px] border-4 border-dashed border-slate-200 rounded-[3rem] flex flex-col items-center justify-center text-slate-400 p-12 text-center group">
-                                    <div className="bg-slate-100 p-8 rounded-full mb-8 text-slate-300 group-hover:scale-110 group-hover:text-indigo-300 transition-all duration-500">
-                                        <IconRender icon={Plus} size={64} />
-                                    </div>
-                                    <h3 className="text-xl font-black text-slate-600">選擇章節</h3>
-                                    <p className="text-[10px] mt-3 uppercase tracking-widest text-slate-400">Select a chapter to start</p>
-                                </div>
-                            )}
-                        </aside>
-                    </main>
-
-                    {showMockViewer && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-slate-900/60 backdrop-blur-xl animate-in fade-in duration-300">
-                            <div className="bg-white w-full max-w-6xl h-full rounded-[3rem] overflow-hidden flex flex-col shadow-2xl">
-                                <div className="px-8 py-6 border-b flex justify-between items-center bg-white/50 backdrop-blur-md">
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-indigo-600 p-3 rounded-2xl text-white shadow-lg"><IconRender icon={FileText} size={24} /></div>
-                                        <div>
-                                            <h4 className="font-black text-slate-800 tracking-tight">{selectedBook?.title}.pdf</h4>
-                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Digital Study Guide</p>
-                                        </div>
-                                    </div>
-                                    <button onClick={() => setShowMockViewer(false)} className="p-4 bg-slate-100 hover:bg-red-50 hover:text-red-500 rounded-full transition-all active:scale-90"><IconRender icon={X} size={24} /></button>
-                                </div>
-                                <div className="flex-1 bg-slate-50 p-4 md:p-12 overflow-auto flex justify-center custom-scrollbar">
-                                    <div className="bg-white w-full max-w-4xl shadow-2xl p-12 md:p-24 rounded-sm min-h-[1200px] border border-slate-100 flex flex-col">
-                                        <h1 className="text-6xl font-black text-slate-900 leading-none tracking-tighter mb-20">{selectedBook?.title.split('. ')[1]}</h1>
-                                        <div className="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex-1 flex flex-col items-center justify-center">
-                                             <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-200 mb-6 border-4 border-dashed border-indigo-100 animate-spin-slow">
-                                                 <IconRender icon={Globe} size={40} />
-                                             </div>
-                                             <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-xs">正在連線雲端資料庫...</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+                                    <button key={tab} onClick={() => setActiveTab
