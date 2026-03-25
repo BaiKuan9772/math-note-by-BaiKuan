@@ -5,35 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BK 高中數學筆記大全</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        @keyframes spin-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin-slow 8s linear infinite; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #e2e8f0;
-            border-radius: 10px;
-        }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 10px; }
+        [v-cloak] { display: none; }
     </style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
         <div class="flex items-center justify-center min-h-screen text-slate-400 font-bold">
-            系統啟動中...
+            <div class="text-center">
+                <p class="text-xl mb-2">🚀 正在啟動數學筆記系統...</p>
+                <p class="text-sm opacity-50">如果畫面持續空白，請檢查網路連線</p>
+            </div>
         </div>
     </div>
 
     <script type="text/babel">
+        // 確保 React 環境正確
         const { useState, useMemo, useEffect } = React;
 
         const App = () => {
-            // 從全域 window.lucide 安全取得圖標
+            // 安全取得 Lucide 圖標
             const icons = window.lucide || {};
             const { 
                 BookOpen, Clock, CheckCircle2, AlertCircle, Loader2, 
@@ -80,17 +80,8 @@
                 return books;
             }, [activeTab]);
 
-            const handleFileUpload = () => {
-                if (!selectedBook) return;
-                setIsUploading(true);
-                setTimeout(() => {
-                    setFileStatus(prev => ({ ...prev, [selectedBook.id]: true }));
-                    setIsUploading(false);
-                }, 1500);
-            };
-
-            // 如果圖標還沒載入，回傳簡易訊息
-            if (!BookOpen) return <div className="p-20 text-center">正在下載圖標組件...</div>;
+            // 如果圖標沒載入，回傳等待畫面
+            if (!BookOpen) return <div className="p-20 text-center text-slate-400">正在下載圖標資源...</div>;
 
             return (
                 <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-100">
@@ -122,9 +113,9 @@
                                 {filteredBooks.map((book) => (
                                     <div key={book.id} onClick={() => setSelectedBook(book)}
                                         className={`group relative cursor-pointer bg-white rounded-[2rem] p-4 transition-all duration-300 hover:shadow-2xl border-2 ${selectedBook?.id === book.id ? 'border-indigo-500 shadow-xl -translate-y-2' : 'border-transparent shadow-md'}`}>
-                                        <div className={`aspect-[3/4] rounded-2xl mb-4 ${book.color} flex flex-col justify-between p-5 text-white relative overflow-hidden`}>
+                                        <div className={`aspect-[3/4] rounded-2xl mb-4 ${book.color} flex flex-col justify-between p-5 text-white relative overflow-hidden shadow-inner`}>
                                             <div className="text-5xl font-black opacity-20 italic">{book.id < 10 ? `0${book.id}` : book.id}</div>
-                                            <div className="font-bold text-lg leading-tight z-10">{book.title.split('. ')[1]}</div>
+                                            <div className="font-bold text-lg leading-tight z-10 drop-shadow-sm">{book.title.split('. ')[1]}</div>
                                         </div>
                                         <div className="flex justify-between items-center px-1">
                                             <span className="text-[10px] font-black uppercase text-slate-400">{book.examType} UNIT {book.id}</span>
@@ -137,7 +128,7 @@
 
                         <aside className="w-full lg:w-96 shrink-0">
                             {selectedBook ? (
-                                <div className="bg-white rounded-[3rem] shadow-2xl p-8 sticky top-32 border border-slate-100">
+                                <div className="bg-white rounded-[3rem] shadow-2xl p-8 sticky top-32 border border-slate-100 animate-in slide-in-from-right duration-500">
                                     <h2 className="text-3xl font-black text-slate-800 mb-6 tracking-tighter">{selectedBook.title}</h2>
                                     <div className="bg-indigo-50/50 rounded-3xl p-6 mb-8">
                                         <p className="text-[10px] font-black text-indigo-400 mb-4 tracking-widest uppercase flex items-center gap-2"><Clock size={14}/> 章節焦點</p>
@@ -150,21 +141,15 @@
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="space-y-4">
-                                        <button onClick={() => { setIsOpening(true); setTimeout(() => { setIsOpening(false); setShowMockViewer(true); }, 800); }}
-                                            className="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-indigo-700 shadow-lg transition-all">
-                                            {isOpening ? <Loader2 className="animate-spin"/> : <MousePointer2 size={18}/>} 閱覽筆記內容
-                                        </button>
-                                        <button onClick={handleFileUpload} disabled={isUploading}
-                                            className="w-full border-2 border-slate-100 font-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 transition-all text-slate-600">
-                                            {isUploading ? <Loader2 className="animate-spin text-indigo-500"/> : <FileUp size={18}/>} 上傳本地 PDF
-                                        </button>
-                                    </div>
+                                    <button onClick={() => { setIsOpening(true); setTimeout(() => { setIsOpening(false); setShowMockViewer(true); }, 800); }}
+                                        className="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-indigo-700 shadow-lg transition-all active:scale-95">
+                                        {isOpening ? <Loader2 className="animate-spin"/> : <MousePointer2 size={18}/>} 閱覽筆記內容
+                                    </button>
                                 </div>
                             ) : (
                                 <div className="h-full min-h-[400px] border-4 border-dashed border-slate-200 rounded-[3rem] flex flex-col items-center justify-center text-slate-300 text-center p-10">
                                     <Plus size={48} className="mb-4 opacity-50" />
-                                    <p className="font-black uppercase tracking-widest text-sm">請選擇章節開始</p>
+                                    <p className="font-black uppercase tracking-widest text-sm">請選擇左側章節</p>
                                 </div>
                             )}
                         </aside>
@@ -172,7 +157,7 @@
 
                     {showMockViewer && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-                            <div className="bg-white w-full max-w-5xl h-[90vh] rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in duration-300">
+                            <div className="bg-white w-full max-w-5xl h-[90vh] rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl">
                                 <div className="px-8 py-5 border-b flex justify-between items-center bg-white">
                                     <div className="flex items-center gap-3">
                                         <div className="bg-indigo-600 p-2 rounded-xl text-white"><FileText size={20}/></div>
@@ -186,7 +171,7 @@
                                         <div className="h-4 w-1/3 bg-indigo-500 mb-20 rounded-full opacity-20"></div>
                                         <div className="space-y-12">
                                             <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100">
-                                                <h3 className="text-indigo-600 font-black text-xs tracking-widest uppercase mb-6 flex items-center gap-2"><Globe size={16}/> 雲端同步預覽</h3>
+                                                <h3 className="text-indigo-600 font-black text-xs tracking-widest uppercase mb-6 flex items-center gap-2"><Globe size={16}/> 雲端預覽</h3>
                                                 <div className="grid gap-6">
                                                     {selectedBook?.topics.map((t, i) => (
                                                         <div key={i} className="flex flex-col gap-2">
@@ -197,8 +182,7 @@
                                                 </div>
                                             </div>
                                             <div className="py-20 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-[2rem]">
-                                                <div className="animate-spin-slow text-slate-200 mb-4"><Plus size={40} /></div>
-                                                <p className="text-slate-400 font-bold text-sm">正在等待 PDF 串流...</p>
+                                                <p className="text-slate-400 font-bold text-sm">正在等待 PDF 檔案流...</p>
                                             </div>
                                         </div>
                                     </div>
@@ -211,29 +195,25 @@
                         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-slate-400 font-black text-[10px] tracking-widest uppercase">
                             <span className="flex items-center gap-2 text-indigo-500"><Server size={14}/> Cloud Connected</span>
                             <span>BK Math 2026 Version</span>
-                            <button className="px-6 py-2 bg-slate-900 text-white rounded-xl flex items-center gap-2 hover:bg-black transition-all">
-                                <Share2 size={14}/> 分享檔案
-                            </button>
                         </div>
                     </footer>
                 </div>
             );
         };
 
-        // 確保在 DOM 完全加載後進行 React 掛載
-        const startApp = () => {
+        const renderApp = () => {
             const container = document.getElementById('root');
-            const root = ReactDOM.createRoot(container);
-            root.render(<App />);
+            if (container) {
+                const root = ReactDOM.createRoot(container);
+                root.render(<App />);
+            }
         };
 
         if (document.readyState === 'complete') {
-            startApp();
+            renderApp();
         } else {
-            window.addEventListener('load', startApp);
+            window.addEventListener('load', renderApp);
         }
     </script>
 </body>
 </html>
-</body>
-</html> 
